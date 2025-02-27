@@ -1,6 +1,5 @@
 <?php 
 include './connect.php';
-session_start();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = trim($_POST['email']);
@@ -54,6 +53,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 // Store user details in session
                 $_SESSION["user_id"] = $user_id;
                 $_SESSION["email"] = $email;
+                setcookie("user_session", session_id(), time() + (7 * 24 * 60 * 60), "/");
 
                 // Redirect to index.php
                 header("Location: index.php");

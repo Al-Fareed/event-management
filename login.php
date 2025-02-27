@@ -1,16 +1,13 @@
 <?php
-session_start();
 include './connect.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = trim($_POST["email"]);
     $password = trim($_POST["password"]);
 
-    // Validate inputs
     if (empty($email) || empty($password)) {
         echo "<script>alert('All fields are required!');</script>";
     } else {
-        // Use prepared statements to prevent SQL injection
         $stmt = $conn->prepare("SELECT id, email, password FROM users WHERE email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
@@ -19,11 +16,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($result->num_rows > 0) {
             $user = $result->fetch_assoc();
 
-            // Verify password
             if (password_verify($password, $user['password'])) {
-                // Set session variables
+                // Store user details in session
                 $_SESSION["user_id"] = $user["id"];
                 $_SESSION["email"] = $user["email"];
+                
+                // Set a persistent login cookie (optional)
+                setcookie("user_session", session_id(), time() + (7 * 24 * 60 * 60), "/");
 
                 echo "<script>alert('Login successful!');</script>";
                 header("Location: index.php");
@@ -35,14 +34,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo "<script>alert('User not found!');</script>";
         }
 
-        // Close statement
         $stmt->close();
     }
 }
 
-// Close connection
 $conn->close();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
